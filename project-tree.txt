@@ -1,0 +1,29 @@
+SHANJAYS_MART_CAPSTONE
+├── pom.xml
+├── README.md
+├── SETUP_WINDOWS.md
+├── schema.sql
+├── seed.sql
+├── run.bat
+├── .gitignore
+├── .vscode
+│   ├── extensions.json
+│   └── settings.json
+└── src/main
+    ├── java/com/shanjay/mart
+    │   ├── controller
+    │   ├── dao
+    │   ├── service
+    │   ├── model
+    │   ├── dto
+    │   ├── filter
+    │   ├── listener
+    │   ├── util
+    │   └── exception
+    ├── resources/schema.sql
+    └── webapp
+        ├── index.jsp
+        ├── assets/css/style.css
+        └── WEB-INF
+            ├── web.xml
+            └── views

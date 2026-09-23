@@ -1,0 +1,2 @@
+-- Demo users are created automatically by AppListener on first startup.
+-- Demo passwords: 1234

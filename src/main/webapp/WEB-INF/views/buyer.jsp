@@ -32,11 +32,20 @@
 
         <!-- Right Navigation Links -->
         <div class="nav-links">
+            <a href="${pageContext.request.contextPath}/dashboard">
+                <span>📊</span> Dashboard
+            </a>
+            <a href="${pageContext.request.contextPath}/wishlist">
+                <span>❤️</span> Wishlist
+            </a>
             <a href="${pageContext.request.contextPath}/cart">
                 <span>🛒</span> Cart
             </a>
             <a href="${pageContext.request.contextPath}/orders">
                 <span>📦</span> Orders
+            </a>
+            <a href="${pageContext.request.contextPath}/profile">
+                <span>👤</span> Profile
             </a>
             <a href="${pageContext.request.contextPath}/logout" style="color: #DC2626;">
                 <span>🚪</span> Logout
@@ -84,12 +93,27 @@
                         double ratingVal = (ratingsMap != null && ratingsMap.containsKey(p.id)) ? ratingsMap.get(p.id) : 4.5;
                         int reviewCnt = (reviewCountsMap != null && reviewCountsMap.containsKey(p.id)) ? reviewCountsMap.get(p.id) : 18;
             %>
-                <div class="product">
-                    <img src="<%= img %>" alt="<%= p.name %>" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600'">
+                <div class="product" style="position: relative;">
+                    <!-- Wishlist Shortcut on Card -->
+                    <form method="post" action="${pageContext.request.contextPath}/wishlist" style="position: absolute; top: 10px; right: 10px; z-index: 5; margin: 0; padding: 0; background: none; border: none;">
+                        <input type="hidden" name="productId" value="<%= p.id %>">
+                        <input type="hidden" name="redirect" value="${pageContext.request.contextPath}/shop">
+                        <button type="submit" title="Save to Wishlist" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.92); border: 1px solid var(--border-color); color: var(--primary); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); padding: 0;">
+                            🤍
+                        </button>
+                    </form>
+
+                    <a href="${pageContext.request.contextPath}/product?id=<%= p.id %>" style="display: block;">
+                        <img src="<%= img %>" alt="<%= p.name %>" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600'">
+                    </a>
                     
                     <div class="product-body">
                         <span class="category-tag"><%= p.category %></span>
-                        <h3 title="<%= p.name %>"><%= p.name %></h3>
+                        <h3 title="<%= p.name %>">
+                            <a href="${pageContext.request.contextPath}/product?id=<%= p.id %>" style="color: inherit; text-decoration: none;">
+                                <%= p.name %>
+                            </a>
+                        </h3>
                         
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                             <div style="display: flex; align-items: center; gap: 8px;">
@@ -124,6 +148,10 @@
                                 🛒 Add to Cart
                             </button>
                         </form>
+
+                        <a href="${pageContext.request.contextPath}/product?id=<%= p.id %>" style="display: block; text-align: center; font-size: 0.82rem; color: var(--primary); font-weight: 600; margin-top: 10px;">
+                            View Full Details & Reviews →
+                        </a>
                     </div>
                 </div>
             <% 
@@ -196,5 +224,7 @@
             document.getElementById('reviewsModal').classList.remove('active');
         }
     </script>
+    <script src="${pageContext.request.contextPath}/assets/js/chatbot.js"></script>
 </body>
 </html>
+

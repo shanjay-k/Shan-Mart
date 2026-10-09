@@ -64,6 +64,22 @@ public class ProductDAO {
         return list;
     }
 
+    public List<Product> getRelated(String category, long excludeId, int limit) throws SQLException {
+        List<Product> list = new ArrayList<>();
+        String sql = "SELECT * FROM products WHERE category = ? AND id <> ? ORDER BY id DESC LIMIT ?";
+        try (Connection c = ds.getConnection(); PreparedStatement p = c.prepareStatement(sql)) {
+            p.setString(1, category != null ? category : "");
+            p.setLong(2, excludeId);
+            p.setInt(3, limit > 0 ? limit : 4);
+            try (ResultSet r = p.executeQuery()) {
+                while (r.next()) {
+                    list.add(map(r));
+                }
+            }
+        }
+        return list;
+    }
+
     public List<Product> all() throws SQLException {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT * FROM products ORDER BY id DESC";

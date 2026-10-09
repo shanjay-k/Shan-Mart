@@ -2,6 +2,7 @@ package com.shanjay.mart.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,26 +10,35 @@ import com.shanjay.mart.dao.CartDAO;
 import com.shanjay.mart.dao.OrderDAO;
 import com.shanjay.mart.dao.ProductDAO;
 import com.shanjay.mart.dao.ReviewDAO;
+import com.shanjay.mart.dao.WishlistDAO;
 import com.shanjay.mart.model.CartItem;
 import com.shanjay.mart.model.Order;
+import com.shanjay.mart.model.OrderItem;
 import com.shanjay.mart.model.Product;
 import com.shanjay.mart.model.Review;
+import com.shanjay.mart.model.WishlistItem;
 
 public class ShopService {
     private final ProductDAO products;
     private final CartDAO cart;
     private final OrderDAO orders;
     private final ReviewDAO reviews;
+    private final WishlistDAO wishlist;
 
     public ShopService(ProductDAO p, CartDAO c, OrderDAO o) {
-        this(p, c, o, null);
+        this(p, c, o, null, null);
     }
 
     public ShopService(ProductDAO p, CartDAO c, OrderDAO o, ReviewDAO r) {
+        this(p, c, o, r, null);
+    }
+
+    public ShopService(ProductDAO p, CartDAO c, OrderDAO o, ReviewDAO r, WishlistDAO w) {
         this.products = p;
         this.cart = c;
         this.orders = o;
         this.reviews = r;
+        this.wishlist = w;
     }
 
     // --- Product Methods ---
@@ -46,6 +56,13 @@ public class ShopService {
 
     public List<Product> getAllProducts() throws Exception {
         return products.all();
+    }
+
+    public List<Product> getRelatedProducts(long productId, String category, int limit) throws Exception {
+        if (products != null) {
+            return products.getRelated(category, productId, limit);
+        }
+        return List.of();
     }
 
     public void addProduct(Product p) throws Exception {
@@ -98,6 +115,38 @@ public class ShopService {
 
     public BigDecimal total(List<CartItem> a) {
         return a.stream().map(CartItem::total).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    // --- Wishlist Methods (O1) ---
+    public void addWishlist(long buyerId, long productId) throws Exception {
+        if (wishlist != null) {
+            wishlist.add(buyerId, productId);
+        }
+    }
+
+    public void removeWishlist(long buyerId, long productId) throws Exception {
+        if (wishlist != null) {
+            wishlist.remove(buyerId, productId);
+        }
+    }
+
+    public List<WishlistItem> getWishlist(long buyerId) throws Exception {
+        return wishlist != null ? wishlist.list(buyerId) : List.of();
+    }
+
+    public boolean isWishlisted(long buyerId, long productId) throws Exception {
+        return wishlist != null && wishlist.isWishlisted(buyerId, productId);
+    }
+
+    public int getWishlistCount(long buyerId) throws Exception {
+        return wishlist != null ? wishlist.count(buyerId) : 0;
+    }
+
+    public void moveWishlistToCart(long buyerId, long productId, int qty) throws Exception {
+        addCart(buyerId, productId, qty > 0 ? qty : 1);
+        if (wishlist != null) {
+            wishlist.remove(buyerId, productId);
+        }
     }
 
     // --- Checkout & Orders ---
@@ -200,5 +249,59 @@ public class ShopService {
 
     public Map<Long, Integer> getAllProductReviewCounts() throws Exception {
         return reviews != null ? reviews.getAllProductReviewCounts() : Map.of();
+    }
+
+    // --- Dashboard & Profile Analytics ---
+    public Map<String, Object> getBuyerStats(long buyerId) throws Exception {
+        List<Order> myOrders = buyerOrders(buyerId);
+        int orderCount = myOrders.size();
+        BigDecimal totalSpent = myOrders.stream().map(o -> o.total).reduce(BigDecimal.ZERO, BigDecimal::add);
+        int wishlistCount = getWishlistCount(buyerId);
+        List<CartItem> cartItems = getCart(buyerId);
+        int cartItemsCount = cartItems.size();
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("orderCount", orderCount);
+        stats.put("totalSpent", totalSpent);
+        stats.put("wishlistCount", wishlistCount);
+        stats.put("cartItemsCount", cartItemsCount);
+        return stats;
+    }
+
+    public Map<String, Object> getSellerStats(long sellerId) throws Exception {
+        List<Product> myProducts = getSellerProducts(sellerId);
+        List<Order> incomingOrders = sellerOrders(sellerId);
+
+        long lowStockCount = myProducts.stream().filter(p -> p.stockQty <= 5).count();
+        BigDecimal totalRevenue = BigDecimal.ZERO;
+        for (Order o : incomingOrders) {
+            if (o.items != null) {
+                for (OrderItem it : o.items) {
+                    if (it.sellerId == sellerId) {
+                        totalRevenue = totalRevenue.add(it.getSubtotal());
+                    }
+                }
+            }
+        }
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("productCount", myProducts.size());
+        stats.put("orderCount", incomingOrders.size());
+        stats.put("totalRevenue", totalRevenue);
+        stats.put("lowStockCount", lowStockCount);
+        return stats;
+    }
+
+    public Map<String, Object> getAdminStats(int usersCount) throws Exception {
+        List<Product> allP = getAllProducts();
+        List<Order> allO = allOrders();
+        BigDecimal gmv = allO.stream().map(o -> o.total).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("usersCount", usersCount);
+        stats.put("productsCount", allP.size());
+        stats.put("ordersCount", allO.size());
+        stats.put("gmv", gmv);
+        return stats;
     }
 }

@@ -18,11 +18,18 @@
         <div class="nav-links">
             <% if (user != null && "SELLER".equalsIgnoreCase(user.role)) { %>
                 <a href="${pageContext.request.contextPath}/dashboard"><span>📊</span> Dashboard</a>
+                <a href="${pageContext.request.contextPath}/shop"><span>🛍️</span> Storefront</a>
+                <a href="${pageContext.request.contextPath}/profile"><span>👤</span> Profile</a>
             <% } else if (user != null && "ADMIN".equalsIgnoreCase(user.role)) { %>
                 <a href="${pageContext.request.contextPath}/dashboard"><span>🛡️</span> Admin Panel</a>
+                <a href="${pageContext.request.contextPath}/shop"><span>🛍️</span> Storefront</a>
+                <a href="${pageContext.request.contextPath}/profile"><span>👤</span> Profile</a>
             <% } else { %>
-                <a href="${pageContext.request.contextPath}/shop"><span>🛍️</span> Continue Shopping</a>
+                <a href="${pageContext.request.contextPath}/dashboard"><span>📊</span> Dashboard</a>
+                <a href="${pageContext.request.contextPath}/shop"><span>🛍️</span> Shop</a>
+                <a href="${pageContext.request.contextPath}/wishlist"><span>❤️</span> Wishlist</a>
                 <a href="${pageContext.request.contextPath}/cart"><span>🛒</span> Cart</a>
+                <a href="${pageContext.request.contextPath}/profile"><span>👤</span> Profile</a>
             <% } %>
             <a href="${pageContext.request.contextPath}/logout" style="color: #DC2626;">
                 <span>🚪</span> Logout
@@ -156,9 +163,15 @@
                                     %>
                                         <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-sm); gap: 12px; flex-wrap: wrap;">
                                             <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 200px;">
-                                                <img src="<%= itImg %>" alt="<%= item.productName %>" style="width: 44px; height: 44px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-color);" onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600'">
+                                                <a href="${pageContext.request.contextPath}/product?id=<%= item.productId %>">
+                                                    <img src="<%= itImg %>" alt="<%= item.productName %>" style="width: 44px; height: 44px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-color);" onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600'">
+                                                </a>
                                                 <div>
-                                                    <div style="font-weight: 600; font-size: 0.92rem; color: var(--text-heading);"><%= item.productName %></div>
+                                                    <div style="font-weight: 600; font-size: 0.92rem; color: var(--text-heading);">
+                                                        <a href="${pageContext.request.contextPath}/product?id=<%= item.productId %>" style="color: inherit; text-decoration: none;">
+                                                            <%= item.productName %>
+                                                        </a>
+                                                    </div>
                                                     <div style="font-size: 0.8rem; color: var(--text-muted);">
                                                         Qty: <b><%= item.quantity %></b> × ₹<%= item.unitPrice %>
                                                     </div>
@@ -239,5 +252,7 @@
             document.getElementById('rateModal').classList.remove('active');
         }
     </script>
+    <script src="${pageContext.request.contextPath}/assets/js/chatbot.js"></script>
 </body>
 </html>
+

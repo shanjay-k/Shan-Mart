@@ -16,11 +16,20 @@
         </a>
 
         <div class="nav-links">
+            <a href="${pageContext.request.contextPath}/dashboard">
+                <span>📊</span> Dashboard
+            </a>
             <a href="${pageContext.request.contextPath}/shop">
                 <span>🛍️</span> Shop More
             </a>
+            <a href="${pageContext.request.contextPath}/wishlist">
+                <span>❤️</span> Wishlist
+            </a>
             <a href="${pageContext.request.contextPath}/orders">
                 <span>📦</span> Orders
+            </a>
+            <a href="${pageContext.request.contextPath}/profile">
+                <span>👤</span> Profile
             </a>
             <a href="${pageContext.request.contextPath}/logout" style="color: #DC2626;">
                 <span>🚪</span> Logout
@@ -52,11 +61,20 @@
                     <% for (CartItem i : items) { %>
                         <div class="cart-item-row">
                             <div style="flex: 1;">
-                                <h4 style="font-size: 1.05rem; margin-bottom: 4px;"><%= i.name %></h4>
+                                <h4 style="font-size: 1.05rem; margin-bottom: 4px;">
+                                    <a href="${pageContext.request.contextPath}/product?id=<%= i.productId %>" style="color: inherit; text-decoration: none;">
+                                        <%= i.name %>
+                                    </a>
+                                </h4>
                                 <p style="color: var(--text-muted); font-size: 0.9rem;">
                                     Quantity: <b><%= i.quantity %></b>
                                 </p>
                                 <span class="free-delivery-badge" style="margin-top: 6px; display: inline-block;">Free Delivery</span>
+                                <div style="margin-top: 4px;">
+                                    <a href="${pageContext.request.contextPath}/product?id=<%= i.productId %>" style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">
+                                        View Details & Reviews →
+                                    </a>
+                                </div>
                             </div>
 
                             <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
@@ -113,5 +131,7 @@
             </div>
         <% } %>
     </div>
+    <script src="${pageContext.request.contextPath}/assets/js/chatbot.js"></script>
 </body>
 </html>
+

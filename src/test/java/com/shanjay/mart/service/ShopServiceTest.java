@@ -1,12 +1,14 @@
 package com.shanjay.mart.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import com.shanjay.mart.dao.OrderDAO;
 import com.shanjay.mart.dao.ProductDAO;
 import com.shanjay.mart.dao.ReviewDAO;
 import com.shanjay.mart.dao.UserDAO;
+import com.shanjay.mart.dao.WishlistDAO;
 import com.shanjay.mart.model.Order;
 import com.shanjay.mart.model.Product;
 
@@ -27,6 +30,7 @@ public class ShopServiceTest extends BaseDAOTest {
     private OrderDAO orderDAO;
     private ReviewDAO reviewDAO;
     private UserDAO userDAO;
+    private WishlistDAO wishlistDAO;
 
     private long buyerId;
     private long productId;
@@ -38,8 +42,9 @@ public class ShopServiceTest extends BaseDAOTest {
         orderDAO = new OrderDAO(dataSource);
         reviewDAO = new ReviewDAO(dataSource);
         userDAO = new UserDAO(dataSource);
+        wishlistDAO = new WishlistDAO(dataSource);
 
-        shopService = new ShopService(productDAO, cartDAO, orderDAO, reviewDAO);
+        shopService = new ShopService(productDAO, cartDAO, orderDAO, reviewDAO, wishlistDAO);
 
         userDAO.create("Demo Seller", "seller@test.com", "hash", "SELLER");
         userDAO.create("Demo Buyer", "buyer@test.com", "hash", "BUYER");
@@ -96,6 +101,46 @@ public class ShopServiceTest extends BaseDAOTest {
         // 5. Verify stock was reduced
         Product refreshed = productDAO.findById(productId);
         assertEquals(18, refreshed.stockQty);
+    }
+
+    @Test
+    public void testWishlistOperationsAndMoveToCart() throws Exception {
+        // Test add to wishlist
+        shopService.addWishlist(buyerId, productId);
+        assertTrue(shopService.isWishlisted(buyerId, productId));
+        assertEquals(1, shopService.getWishlistCount(buyerId));
+
+        var items = shopService.getWishlist(buyerId);
+        assertEquals(1, items.size());
+        assertEquals("Ergonomic Office Chair", items.get(0).productName);
+
+        // Test move to cart
+        shopService.moveWishlistToCart(buyerId, productId, 1);
+        assertFalse(shopService.isWishlisted(buyerId, productId));
+        assertEquals(0, shopService.getWishlistCount(buyerId));
+
+        var cartItems = shopService.getCart(buyerId);
+        assertEquals(1, cartItems.size());
+        assertEquals(productId, cartItems.get(0).productId);
+    }
+
+    @Test
+    public void testBuyerAndSellerAnalytics() throws Exception {
+        // Checkout 1 item
+        shopService.addCart(buyerId, productId, 1);
+        shopService.checkout(buyerId);
+
+        // Add 1 wishlist item
+        shopService.addWishlist(buyerId, productId);
+
+        Map<String, Object> buyerStats = shopService.getBuyerStats(buyerId);
+        assertEquals(1, buyerStats.get("orderCount"));
+        assertEquals(1, buyerStats.get("wishlistCount"));
+
+        Map<String, Object> sellerStats = shopService.getSellerStats(1L);
+        assertEquals(1, sellerStats.get("productCount"));
+        assertEquals(1, sellerStats.get("orderCount"));
+        assertEquals(new BigDecimal("8500.00"), sellerStats.get("totalRevenue"));
     }
 
     @Test

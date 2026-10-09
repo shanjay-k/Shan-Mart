@@ -13,6 +13,7 @@ if %ERRORLEVEL% neq 0 (
 )
 
 echo [2/4] Deploying to Tomcat...
+
 :: Change this path if your Tomcat is installed somewhere else
 set TOMCAT_DIR=D:\apache-tomcat-9.0.121
 copy /Y "target\shanjays-mart.war" "%TOMCAT_DIR%\webapps\"
@@ -26,5 +27,12 @@ echo [4/4] Launching Website...
 timeout /t 4 /nobreak > nul
 start http://localhost:8080/shanjays-mart/
 
-echo Success! SHAN MART is live.
+echo.
+echo =========================================================
+echo  Success! SHAN MART is live locally:
+echo  http://localhost:8080/shanjays-mart/
+echo.
+echo  To open on Android, iPhone, Tablets or other laptops:
+echo  Run "share_public.bat" to get a worldwide public link + QR code!
+echo =========================================================
 pause

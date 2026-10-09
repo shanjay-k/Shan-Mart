@@ -95,5 +95,8 @@
         <p><b>SHAN MART</b> — Inspired by Meesho & Amazon. Built for fast, joyful, and smart e-commerce.</p>
         <p style="margin-top: 6px; font-size: 0.8rem;">© 2026 SHAN MART. All rights reserved.</p>
     </footer>
+
+    <script src="${pageContext.request.contextPath}/assets/js/chatbot.js"></script>
 </body>
 </html>
+

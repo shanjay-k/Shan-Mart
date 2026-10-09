@@ -21,6 +21,9 @@
             <a href="${pageContext.request.contextPath}/shop">
                 <span>🛍️</span> Storefront Preview
             </a>
+            <a href="${pageContext.request.contextPath}/profile">
+                <span>👤</span> Profile
+            </a>
             <a href="${pageContext.request.contextPath}/logout" style="color: #DC2626;">
                 <span>🚪</span> Logout
             </a>
@@ -37,15 +40,52 @@
 
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
             <div>
-                <h2>Seller Inventory Dashboard</h2>
+                <h2>Seller Central & Sales Dashboard</h2>
                 <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 4px;">
-                    Manage your marketplace listings, stock levels, and pricing
+                    O3 Sales Analytics: Monitor sales performance, inventory stock, and marketplace listings
                 </p>
             </div>
             <button type="button" class="btn" onclick="document.getElementById('newProductCard').scrollIntoView({behavior: 'smooth'})">
                 ➕ Add New Listing
             </button>
         </div>
+
+        <% java.util.Map<String, Object> stats = (java.util.Map<String, Object>) request.getAttribute("stats"); %>
+        <% if (stats != null) { %>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 32px;">
+                <div class="feature-box">
+                    <div class="feature-icon" style="background: var(--accent-green-bg); color: var(--accent-green);">💰</div>
+                    <div class="feature-text">
+                        <h4 style="font-size: 1.35rem;">₹ <%= stats.get("totalRevenue") %></h4>
+                        <p>Total sales revenue</p>
+                    </div>
+                </div>
+
+                <div class="feature-box">
+                    <div class="feature-icon" style="background: #E0E7FF; color: #3730A3;">📦</div>
+                    <div class="feature-text">
+                        <h4 style="font-size: 1.35rem;"><%= stats.get("orderCount") %> Orders</h4>
+                        <p>Orders received</p>
+                    </div>
+                </div>
+
+                <div class="feature-box">
+                    <div class="feature-icon" style="background: var(--primary-light); color: var(--primary);">🛍️</div>
+                    <div class="feature-text">
+                        <h4 style="font-size: 1.35rem;"><%= stats.get("productCount") %> Products</h4>
+                        <p>Active catalog listings</p>
+                    </div>
+                </div>
+
+                <div class="feature-box">
+                    <div class="feature-icon" style="background: #FEF3C7; color: #92400E;">⚠️</div>
+                    <div class="feature-text">
+                        <h4 style="font-size: 1.35rem;"><%= stats.get("lowStockCount") %> Low Stock</h4>
+                        <p>Items need replenishment</p>
+                    </div>
+                </div>
+            </div>
+        <% } %>
 
         <!-- Listings Management Table (F2, Week 3-4) -->
         <div class="card" style="max-width: 100%; box-shadow: var(--shadow-sm); padding: 24px; margin-bottom: 32px;">
@@ -244,5 +284,7 @@
             document.getElementById('editProductModal').classList.remove('active');
         }
     </script>
+    <script src="${pageContext.request.contextPath}/assets/js/chatbot.js"></script>
 </body>
 </html>
+

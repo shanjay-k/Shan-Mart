@@ -21,6 +21,9 @@
             <a href="${pageContext.request.contextPath}/shop">
                 <span>🛍️</span> Storefront Preview
             </a>
+            <a href="${pageContext.request.contextPath}/profile">
+                <span>👤</span> Profile
+            </a>
             <a href="${pageContext.request.contextPath}/logout" style="color: #DC2626;">
                 <span>🚪</span> Logout
             </a>
@@ -163,5 +166,7 @@
             </div>
         </div>
     </div>
+    <script src="${pageContext.request.contextPath}/assets/js/chatbot.js"></script>
 </body>
 </html>
+

@@ -1,6 +1,8 @@
 package com.shanjay.mart.controller;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -13,7 +15,11 @@ import com.shanjay.mart.dao.OrderDAO;
 import com.shanjay.mart.dao.ProductDAO;
 import com.shanjay.mart.dao.ReviewDAO;
 import com.shanjay.mart.dao.UserDAO;
+import com.shanjay.mart.dao.WishlistDAO;
+import com.shanjay.mart.model.Order;
+import com.shanjay.mart.model.Product;
 import com.shanjay.mart.model.User;
+import com.shanjay.mart.model.WishlistItem;
 import com.shanjay.mart.service.ShopService;
 
 public class DashboardServlet extends HttpServlet {
@@ -23,7 +29,7 @@ public class DashboardServlet extends HttpServlet {
     @Override
     public void init() {
         DataSource ds = (DataSource) getServletContext().getAttribute("ds");
-        shop = new ShopService(new ProductDAO(ds), new CartDAO(ds), new OrderDAO(ds), new ReviewDAO(ds));
+        shop = new ShopService(new ProductDAO(ds), new CartDAO(ds), new OrderDAO(ds), new ReviewDAO(ds), new WishlistDAO(ds));
         userDAO = new UserDAO(ds);
     }
 
@@ -35,20 +41,38 @@ public class DashboardServlet extends HttpServlet {
             return;
         }
 
-        if ("BUYER".equalsIgnoreCase(user.role)) {
-            resp.sendRedirect(req.getContextPath() + "/shop");
-            return;
-        }
-
         try {
-            if ("SELLER".equalsIgnoreCase(user.role)) {
-                req.setAttribute("products", shop.getSellerProducts(user.id));
-                req.setAttribute("orders", shop.sellerOrders(user.id));
+            if ("BUYER".equalsIgnoreCase(user.role)) {
+                Map<String, Object> stats = shop.getBuyerStats(user.id);
+                List<Order> orders = shop.buyerOrders(user.id);
+                List<WishlistItem> wishlist = shop.getWishlist(user.id);
+
+                req.setAttribute("stats", stats);
+                req.setAttribute("recentOrders", orders.size() > 5 ? orders.subList(0, 5) : orders);
+                req.setAttribute("allOrdersCount", orders.size());
+                req.setAttribute("wishlistItems", wishlist.size() > 4 ? wishlist.subList(0, 4) : wishlist);
+                req.setAttribute("wishlistCount", wishlist.size());
+
+                req.getRequestDispatcher("/WEB-INF/views/buyer-dashboard.jsp").forward(req, resp);
+            } else if ("SELLER".equalsIgnoreCase(user.role)) {
+                List<Product> products = shop.getSellerProducts(user.id);
+                List<Order> orders = shop.sellerOrders(user.id);
+                Map<String, Object> stats = shop.getSellerStats(user.id);
+
+                req.setAttribute("products", products);
+                req.setAttribute("orders", orders);
+                req.setAttribute("stats", stats);
                 req.getRequestDispatcher("/WEB-INF/views/seller.jsp").forward(req, resp);
             } else if ("ADMIN".equalsIgnoreCase(user.role)) {
-                req.setAttribute("users", userDAO.all());
-                req.setAttribute("products", shop.getAllProducts());
-                req.setAttribute("orders", shop.allOrders());
+                List<User> users = userDAO.all();
+                List<Product> products = shop.getAllProducts();
+                List<Order> orders = shop.allOrders();
+                Map<String, Object> stats = shop.getAdminStats(users.size());
+
+                req.setAttribute("users", users);
+                req.setAttribute("products", products);
+                req.setAttribute("orders", orders);
+                req.setAttribute("stats", stats);
                 req.getRequestDispatcher("/WEB-INF/views/admin.jsp").forward(req, resp);
             } else {
                 resp.sendRedirect(req.getContextPath() + "/shop");
